@@ -21,6 +21,9 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 	#specify columns for data frame
 	df = pd.DataFrame(columns = ['Date','Unix','Ticker','Debt/Equity Ratio'])
 
+	#read S&P 500 index data into dataframe 
+	sp500_df = pd.read_csv("all_stocks_5yr.csv")
+
 	#for every file in the directory
 	for each_dir in stock_list[1:]:
 		
@@ -57,6 +60,17 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 					
 					value = float(source.split(gather + ':</td><td class="yfnc_tabledata1">')[1].split('</td>')[0])
 					
+					try:
+						sp500_date = datetime.fromtimestamp(unix_time).strftime('%Y-%m-%d')
+						row = sp500_df[(sp500_df.index == sp500_date)]
+						sp500_value = float(row("close"))
+					except:
+						sp500_date = datetime.fromtimestamp(unix_time-259200).strftime('%Y-%m-%d')
+						row = sp500_df[(sp500_df.index == sp500_date)]
+						sp500_value = float(row("close"))
+
+					stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
+					print("stock price: ",stock_price, "ticker: ", ticker)
  
 					df = df.append({'Date':date_stamp,'Unix':unix_time,'Ticker':ticker,'Debt/Equity Ratio':value},ignore_index = True)
 				
@@ -66,8 +80,8 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 				
 	#reformat file name		
 	save = gather.replace(' ','').replace(')','').replace('(','').replace('/','') + ('.csv')
-	df.to_csv(save)				
-	print(save)
+	#df.to_csv(save)				
+	print(save + " has been saved")
 				
 				
 
