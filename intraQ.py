@@ -22,7 +22,7 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 	df = pd.DataFrame(columns = ['Date','Unix','Ticker','Debt/Equity Ratio'])
 
 	#for every file in the directory
-	for each_dir in stock_list[1:5]:
+	for each_dir in stock_list[1:]:
 		
 		#list files in each directory
 		each_file = os.listdir(each_dir)
@@ -64,10 +64,10 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 					#print(str(e))
 					pass
 				
-				
+	#reformat file name		
 	save = gather.replace(' ','').replace(')','').replace('(','').replace('/','') + ('.csv')
-	print(save)
 	df.to_csv(save)				
+	print(save)
 				
 				
 
