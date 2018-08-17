@@ -22,10 +22,11 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 	df = pd.DataFrame(columns = ['Date','Unix','Ticker','Debt/Equity Ratio'])
 
 	#read S&P 500 index data into dataframe 
-	sp500_df = pd.read_csv("all_stocks_5yr.csv")
+	sp500_df = pd.read_csv("YAHOO-INDEX_GSPC.csv")
+
 
 	#for every file in the directory
-	for each_dir in stock_list[1:]:
+	for each_dir in stock_list[1:5]:
 		
 		#list files in each directory
 		each_file = os.listdir(each_dir)
@@ -52,24 +53,46 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 				source = open(full_file_path,'r').read()
 				
 				
-				#Elemment on the right of first split is the target value hence we use first element 
-				#then split again by table tag to collect element from beginning/left of the remaining paragraph. 
+				
 				#try-except is due to some files having an extra space or indent between table tags, 
 				#leading to index out of range errors.
 				try:
-					
+					#Elemment on the right of first split is the target value hence we use first element 
+					#then split again by table tag to collect element from beginning/left of the remaining paragraph. 
 					value = float(source.split(gather + ':</td><td class="yfnc_tabledata1">')[1].split('</td>')[0])
 					
+					#Extacting stock price from S&P 500 Index as a benchmark to compare sample data against
 					try:
-						sp500_date = datetime.fromtimestamp(unix_time).strftime('%Y-%m-%d')
-						row = sp500_df[(sp500_df.index == sp500_date)]
-						sp500_value = float(row("close"))
+						#Extract date 
+						sp500_date = datetime.fromtimestamp(unix_time).strftime('%Y-%m-%d')	
+						#print("date extracted")
+
+						#Set date as index of sp500 Dataframe
+						row = sp500_df[sp500_df["Date"] == sp500_date]
+						#print("row extracted")												
+						
+						#some rows have an extra indent, so this if-else just skips over them
+						if len(row) != 0:
+
+							#extract S&P 500 stock price from Adj Close row
+							sp500_value = float(row["Adj Close"])
+							#print("s&p value extracted")
+							
+						else:
+							print("\nrow empty\n")
+							pass
+
+				
 					except:
 						sp500_date = datetime.fromtimestamp(unix_time-259200).strftime('%Y-%m-%d')
 						row = sp500_df[(sp500_df.index == sp500_date)]
-						sp500_value = float(row("close"))
+						sp500_value = float(row["Adj close"])
 
+					
+					#Extract stock price from sample data
 					stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
+						
+					
 					print("stock price: ",stock_price, "ticker: ", ticker)
  
 					df = df.append({'Date':date_stamp,'Unix':unix_time,'Ticker':ticker,'Debt/Equity Ratio':value},ignore_index = True)
