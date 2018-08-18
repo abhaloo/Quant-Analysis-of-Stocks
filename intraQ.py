@@ -19,14 +19,14 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 	stock_list = [x[0] for x in os.walk(statspath)]
 	
 	#specify columns for data frame
-	df = pd.DataFrame(columns = ['Date','Unix','Ticker','Debt/Equity Ratio'])
+	df = pd.DataFrame(columns = ['Date','Unix','Ticker','Debt/Equity Ratio','Stock Price','SP 500'])
 
 	#read S&P 500 index data into dataframe 
 	sp500_df = pd.read_csv("YAHOO-INDEX_GSPC.csv")
 
 
 	#for every file in the directory
-	for each_dir in stock_list[1:5]:
+	for each_dir in stock_list[1:25]:
 		
 		#list files in each directory
 		each_file = os.listdir(each_dir)
@@ -95,7 +95,11 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 					
 					print("stock price: ",stock_price, "ticker: ", ticker)
  
-					df = df.append({'Date':date_stamp,'Unix':unix_time,'Ticker':ticker,'Debt/Equity Ratio':value},ignore_index = True)
+					df = df.append({'Date':date_stamp,
+						'Unix':unix_time,'Ticker':ticker,
+						'Debt/Equity Ratio':value,
+						'Stock Price':stock_price,
+						'SP 500':sp500_value},ignore_index = True)
 				
 				except Exception as e:
 					#print(str(e))
@@ -103,7 +107,7 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 				
 	#reformat file name		
 	save = gather.replace(' ','').replace(')','').replace('(','').replace('/','') + ('.csv')
-	#df.to_csv(save)				
+	df.to_csv(save)				
 	print(save + " has been saved")
 				
 				
