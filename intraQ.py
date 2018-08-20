@@ -6,6 +6,15 @@ from datetime import datetime
 #use Path objects to adjust path format to match operating system format
 from pathlib import Path
 
+from time import mktime
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib import style
+style.use('dark_background')
+
+#regular expressions
+import re
+
 
 path = Path("C:/stockData/intraQuarter")
 
@@ -19,14 +28,16 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 	stock_list = [x[0] for x in os.walk(statspath)]
 	
 	#specify columns for data frame
-	df = pd.DataFrame(columns = ['Date',
+	df = pd.DataFrame(columns = [
+		'Date',
 		'Unix',
 		'Ticker',
 		'Debt/Equity Ratio',
 		'Stock Price',
 		'Stock Percent Change',
-		'SP 500',
-		'SP500 Percent Change'])
+		'SP500',
+		'SP500 Percent Change',
+		'Difference'])
 
 	#read S&P 500 index data into dataframe 
 	sp500_df = pd.read_csv("YAHOO-INDEX_GSPC.csv")
@@ -90,7 +101,8 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 						row = sp500_df[sp500_df["Date"] == sp500_date]
 						#print("row extracted")												
 						
-						#some rows have an extra indent, so this if-else just skips over them
+						#some rows have an extra indent or space which causes an error, 
+						#so this if-else just skips over them
 						if len(row) != 0:
 
 							#extract S&P 500 stock price from Adj Close row
@@ -115,9 +127,12 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 							starting_stock_value = stock_price
 					if not starting_sp500_value:
 							starting_sp500_value = sp500_value
-					#print("stock price: ",stock_price, "ticker: ", ticker)
- 
+					
+ 					
+ 					#calculate percent change of stock price from sample data
 					stock_percent_change = ((stock_price - starting_stock_value)/starting_stock_value) * 100
+					
+					#calculate percent chnage of stock prices from sp500 index data
 					sp500_percent_change = ((sp500_value - starting_sp500_value)/starting_sp500_value) * 100
 
 
@@ -128,12 +143,27 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 						'Stock Price':stock_price,
 						'Stock Percent Change':stock_percent_change,
 						'SP500 Percent Change':sp500_percent_change,
-						'SP 500':sp500_value},ignore_index = True)
+						'SP500':sp500_value,
+						'Difference':stock_percent_change - sp500_percent_change},ignore_index = True)
 				
 				except Exception as e:
 					#print(str(e))
 					pass
 				
+	#plot difference on graph for each ticker
+	for each_ticker in ticker_list:
+		try:
+			#set 
+			plot_df = df[(df['Ticker'] == each_ticker)]
+			plot_df = plot_df.set_index(['Date'])
+			plot_df['Difference'].plot(label = each_ticker)
+			plt.legend()
+		except:
+			pass
+
+	#print graph
+	plt.show()
+
 	#reformat file name		
 	save = gather.replace(' ','').replace(')','').replace('(','').replace('/','') + ('.csv')
 	df.to_csv(save)				
