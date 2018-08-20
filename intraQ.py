@@ -19,10 +19,20 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 	stock_list = [x[0] for x in os.walk(statspath)]
 	
 	#specify columns for data frame
-	df = pd.DataFrame(columns = ['Date','Unix','Ticker','Debt/Equity Ratio','Stock Price','SP 500'])
+	df = pd.DataFrame(columns = ['Date',
+		'Unix',
+		'Ticker',
+		'Debt/Equity Ratio',
+		'Stock Price',
+		'Stock Percent Change',
+		'SP 500',
+		'SP500 Percent Change'])
 
 	#read S&P 500 index data into dataframe 
 	sp500_df = pd.read_csv("YAHOO-INDEX_GSPC.csv")
+
+
+	ticker_list = []
 
 
 	#for every file in the directory
@@ -33,6 +43,15 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 		
 		#read stock ticker/file name
 		ticker = each_dir.split('\\')[4]
+		#add tickers to list
+		ticker_list.append(ticker)
+
+		#every time we read a new ticker we require a new starting point
+		#to perform percentage change
+		starting_stock_value = False
+		starting_sp500_value = False
+
+
 
 		#for every file that has been listed that is not empty
 		if len(each_file) > 0 :
@@ -92,13 +111,23 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 					#Extract stock price from sample data
 					stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
 						
-					
-					print("stock price: ",stock_price, "ticker: ", ticker)
+					if not starting_stock_value:
+							starting_stock_value = stock_price
+					if not starting_sp500_value:
+							starting_sp500_value = sp500_value
+					#print("stock price: ",stock_price, "ticker: ", ticker)
  
+					stock_percent_change = ((stock_price - starting_stock_value)/starting_stock_value) * 100
+					sp500_percent_change = ((sp500_value - starting_sp500_value)/starting_sp500_value) * 100
+
+
+
 					df = df.append({'Date':date_stamp,
 						'Unix':unix_time,'Ticker':ticker,
 						'Debt/Equity Ratio':value,
 						'Stock Price':stock_price,
+						'Stock Percent Change':stock_percent_change,
+						'SP500 Percent Change':sp500_percent_change,
 						'SP 500':sp500_value},ignore_index = True)
 				
 				except Exception as e:
