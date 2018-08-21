@@ -48,7 +48,7 @@ def Key_Stats(gather = "Total Debt/Equity (mrq)"):
 
 
 	#for every file in the directory
-	for each_dir in stock_list[1:10]:
+	for each_dir in stock_list[1:]:
 		
 		#list files in each directory
 		each_file = os.listdir(each_dir)
