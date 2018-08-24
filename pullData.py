@@ -248,7 +248,7 @@ def Key_Stats(gather = ("Total Debt/Equity (mrq)","Trailing P/E")):
 
 	#reformat file name		
 	#save = gather.replace(' ','').replace(')','').replace('(','').replace('/','') + ('.csv')
-	df.to_csv("keyStats.csv")				
+	df.to_csv("key_stats.csv")				
 	print("key stats has been saved")
 				
 				
